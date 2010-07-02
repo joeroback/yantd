@@ -315,13 +315,11 @@ void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes)
 	}
 	
 	// append new bytes
-	data[tm->tm_mday].rx += rx_bytes;
-	data[tm->tm_mday].tx += tx_bytes;
-	
-	dprintf("tm_mday=%d\n", tm->tm_mday);
+	data[tm->tm_mday - 1].rx += rx_bytes;
+	data[tm->tm_mday - 1].tx += tx_bytes;
 	
 	dprintf("rx_bytes=%"PRIu64", tx_bytes=%"PRIu64"\n",
-		data[tm->tm_mday].rx, data[tm->tm_mday].tx);
+		data[tm->tm_mday - 1].rx, data[tm->tm_mday - 1].tx);
 	
 	// write out new bytes
 	if ((fp = fopen(FILENAME, "w")) == NULL)
