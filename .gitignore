@@ -1,0 +1,8 @@
+*.tmproj
+*.o
+*.d
+otraff
+otraffd
+*~
+.AppleDouble
+._*
