@@ -24,10 +24,10 @@ define Build/Prepare
 	$(CP) ./src/* $(PKG_BUILD_DIR)/
 endef
 
-# define Package/yantd/conffiles
-# /etc/config/yantd
-# endef
-# 
+define Package/yantd/conffiles
+/etc/config/yantd
+endef
+
 define Package/yantd/install
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/yantd.init $(1)/etc/init.d/yantd
