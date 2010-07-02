@@ -24,7 +24,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdarg.h>
 #include <string.h>
+#include <syslog.h>
 #include <errno.h>
 
 #ifndef NDEBUG
@@ -32,6 +34,10 @@
 #else
 # define dbgf(fmt, ...) ((void) 0)
 #endif
+
+#define yantdlog(prio, fmt, ...) do { \
+	vsyslog(prio, fmt, ## __VA_ARGS__); \
+while (0)
 
 #define fatalsys(msg) do { \
 	fprintf(stderr, "%s (line %d): %s\n", msg, __LINE__, strerror(errno)); \

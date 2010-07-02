@@ -150,6 +150,9 @@ int main(int argc, char **argv)
 	dbgf("datadir=%s, interface=%s, timeinterval=%u, hostname=%s\n",
 		CFG_DATA_DIR, CFG_IFACE, CFG_INTERVAL, HOSTNAME);
 	
+	// open syslog
+	openlog("yantd", LOG_PID | LOG_NDELAY, LOG_DAEMON);
+	
 	// install signal handlers
 	signal(SIGCHLD, SIG_IGN);
 	signal(SIGTSTP, SIG_IGN);
