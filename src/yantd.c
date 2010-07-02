@@ -298,7 +298,7 @@ void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes)
 	
 	yantdlog(LOG_INFO,
 		"write bytes: filename=%s, year=%d, month=%d, day=%d\n",
-		FILENAME, tm->tm_year + 1900, tm->tm_mon, tm->tm_mday);
+		FILENAME, tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday);
 	
 	// filesize is based on days in month
 	nitems = DAYSINMONTH[tm->tm_mon];
