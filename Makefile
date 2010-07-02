@@ -19,11 +19,11 @@ define Package/yantd/description
   yantd is a ...
 endef
 
-# define Build/Prepare
-#   mkdir -p $(PKG_BUILD_DIR)
-#   $(CP) ./src/* $(PKG_BUILD_DIR)/
-# endef
-# 
+define Build/Prepare
+  mkdir -p $(PKG_BUILD_DIR)
+  $(CP) ./src/* $(PKG_BUILD_DIR)/
+endef
+
 # define Package/yantd/conffiles
 # /etc/config/yantd
 # endef
