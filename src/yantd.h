@@ -36,8 +36,8 @@
 #endif
 
 #define yantdlog(prio, fmt, ...) do { \
-	vsyslog(prio, fmt, ## __VA_ARGS__); \
-while (0)
+	syslog(prio, fmt, ## __VA_ARGS__); \
+} while (0)
 
 #define fatalsys(msg) do { \
 	fprintf(stderr, "%s (line %d): %s\n", msg, __LINE__, strerror(errno)); \

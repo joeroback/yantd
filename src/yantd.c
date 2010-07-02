@@ -145,13 +145,19 @@ int main(int argc, char **argv)
 		
 		// set child to process group leader
 		setsid();
+		
+		// open syslog
+		openlog("yantd", LOG_PID | LOG_NDELAY, LOG_DAEMON);
+	}
+	else
+	{
+		// open syslog, but also output to stderr when staying in foreground
+		openlog("yantd", LOG_PID | LOG_NDELAY | LOG_PERROR, LOG_DAEMON);
 	}
 	
-	dbgf("datadir=%s, interface=%s, timeinterval=%u, hostname=%s\n",
+	yantdlog(LOG_INFO,
+		"datadir=%s, interface=%s, timeinterval=%u, hostname=%s\n",
 		CFG_DATA_DIR, CFG_IFACE, CFG_INTERVAL, HOSTNAME);
-	
-	// open syslog
-	openlog("yantd", LOG_PID | LOG_NDELAY, LOG_DAEMON);
 	
 	// install signal handlers
 	signal(SIGCHLD, SIG_IGN);
@@ -171,7 +177,7 @@ int main(int argc, char **argv)
 		// sleep between reads
 		if ((slp = sleep(CFG_INTERVAL)) != 0U)
 		{
-			dbgf("sleep was interrupted, remaining=%u\n", slp);
+			yantdlog(LOG_NOTICE,"sleep was interrupted, remaining=%u\n", slp);
 		}
 		
 		// read proc net file
@@ -184,7 +190,7 @@ int main(int argc, char **argv)
 		odp = od;
 	} while (termint == 0U);
 	
-	dbgf("main loop terminated, termint=%u\n", termint);
+	yantdlog(LOG_NOTICE, "main loop terminated, termint=%u\n", termint);
 	
 	// return status of 1 on SIGINT...
 	if (termint == 2U)
@@ -212,7 +218,7 @@ static void usage(int status)
 
 static void catch_sigintquitterm(int signo)
 {
-	dbgf("signal handler, signo=%d\n", signo);
+	yantdlog(LOG_INFO, "signal handler, signo=%d\n", signo);
 	
 	switch (signo)
 	{
@@ -290,7 +296,9 @@ void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes)
 	snprintf(FILENAME, sizeof(FILENAME), "%s/%s-%s-%04d%02d.otf",
 		CFG_DATA_DIR, HOSTNAME, CFG_IFACE, tm->tm_year + 1900, tm->tm_mon + 1);
 	
-	dbgf("write_dev_bytes: filename=%s\n", FILENAME);
+	yantdlog(LOG_INFO,
+		"write bytes: filename=%s, year=%d, month=%d, day=%d\n",
+		FILENAME, tm->tm_year, tm->tm_mon, tm->tm_mday);
 	
 	// filesize is based on days in month
 	nitems = DAYSINMONTH[tm->tm_mon];
@@ -332,8 +340,9 @@ void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes)
 	data[tm->tm_mday - 1].rx += rx_bytes;
 	data[tm->tm_mday - 1].tx += tx_bytes;
 	
-	dbgf("rx_bytes=%"PRIu64", tx_bytes=%"PRIu64"\n",
-		data[tm->tm_mday - 1].rx, data[tm->tm_mday - 1].tx);
+	yantdlog(LOG_INFO,
+		"write bytes: rx_bytes=%"PRIu64", tx_bytes=%"PRIu64"\n",
+		rx_bytes, tx_bytes);
 	
 	// write out new bytes
 	if ((fp = fopen(FILENAME, "w")) == NULL)
