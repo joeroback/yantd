@@ -35,6 +35,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <signal.h>
+#include <assert.h>
 
 #define PROGRAM "yantd"
 #define VERSION "1.0"
@@ -75,6 +76,7 @@ int main(int argc, char **argv)
 {
 	struct yantddatum od, odp;
 	int opt;
+	unsigned int slp;
 	
 	// parse cmd line options
 	while ((opt = getopt(argc, argv, "d:fi:t:v")) != -1)
@@ -145,7 +147,7 @@ int main(int argc, char **argv)
 		setsid();
 	}
 	
-	dprintf("datadir=%s, interface=%s, timeinterval=%u, hostname=%s\n",
+	dbgf("datadir=%s, interface=%s, timeinterval=%u, hostname=%s\n",
 		CFG_DATA_DIR, CFG_IFACE, CFG_INTERVAL, HOSTNAME);
 	
 	// install signal handlers
@@ -164,7 +166,10 @@ int main(int argc, char **argv)
 	do
 	{
 		// sleep between reads
-		sleep(CFG_INTERVAL);
+		if ((slp = sleep(CFG_INTERVAL)) != 0U)
+		{
+			dbgf("sleep was interrupted, remaining=%u\n", slp);
+		}
 		
 		// read proc net file
 		read_dev_bytes(&od);
@@ -176,7 +181,7 @@ int main(int argc, char **argv)
 		odp = od;
 	} while (termint == 0U);
 	
-	dprintf("main loop terminated, termint=%u\n", termint);
+	dbgf("main loop terminated, termint=%u\n", termint);
 	
 	// return status of 1 on SIGINT...
 	if (termint == 2U)
@@ -204,7 +209,7 @@ static void usage(int status)
 
 static void catch_sigintquitterm(int signo)
 {
-	dprintf("signal handler, signo=%d\n", signo);
+	dbgf("signal handler, signo=%d\n", signo);
 	
 	switch (signo)
 	{
@@ -240,10 +245,11 @@ void read_dev_bytes(struct yantddatum *bytes)
 	{
 		if (strstr(line, CFG_IFACE) != NULL)
 		{
-			dprintf("\t> %s", line);
-			
 			sscanf(strchr(line, ':') + 1,
-				"%"PRIu64" %*u %*u %*u %*u %*u %*u %*u %"PRIu64" %*u %*u %*u %*u %*u %*u %*u",
+				"%"PRIu64" "
+				"%*u %*u %*u %*u %*u %*u %*u "
+				"%"PRIu64" "
+				"%*u %*u %*u %*u %*u %*u %*u",
 				&bytes->rx, &bytes->tx);
 			break;
 		}
@@ -281,7 +287,7 @@ void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes)
 	snprintf(FILENAME, sizeof(FILENAME), "%s/%s-%s-%04d%02d.otf",
 		CFG_DATA_DIR, HOSTNAME, CFG_IFACE, tm->tm_year + 1900, tm->tm_mon + 1);
 	
-	dprintf("write_dev_bytes: filename=%s\n", FILENAME);
+	dbgf("write_dev_bytes: filename=%s\n", FILENAME);
 	
 	// filesize is based on days in month
 	nitems = DAYSINMONTH[tm->tm_mon];
@@ -323,7 +329,7 @@ void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes)
 	data[tm->tm_mday - 1].rx += rx_bytes;
 	data[tm->tm_mday - 1].tx += tx_bytes;
 	
-	dprintf("rx_bytes=%"PRIu64", tx_bytes=%"PRIu64"\n",
+	dbgf("rx_bytes=%"PRIu64", tx_bytes=%"PRIu64"\n",
 		data[tm->tm_mday - 1].rx, data[tm->tm_mday - 1].tx);
 	
 	// write out new bytes

@@ -28,9 +28,9 @@
 #include <errno.h>
 
 #ifndef NDEBUG
-# define dprintf(fmt, ...) do { fprintf(stderr, fmt, ## __VA_ARGS__); } while (0)
+# define dbgf(fmt, ...) do { fprintf(stderr, fmt, ## __VA_ARGS__); } while (0)
 #else
-# define dprintf(fmt, ...) ((void) 0)
+# define dbgf(fmt, ...) ((void) 0)
 #endif
 
 #define fatalsys(msg) do { \
