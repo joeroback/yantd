@@ -140,6 +140,9 @@ int main(int argc, char **argv)
 		{
 			exit(EXIT_SUCCESS);
 		}
+		
+		// set child to process group leader
+		setsid();
 	}
 	
 	dprintf("datadir=%s, interface=%s, timeinterval=%u, hostname=%s\n",
@@ -272,6 +275,8 @@ void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes)
 	{
 		fatalsys("localtime");
 	}
+	
+	assert(tm->tm_mday < 1 || tm->tm_mday > DAYSINMONTH[tm->tm_mon]);
 	
 	snprintf(FILENAME, sizeof(FILENAME), "%s/%s-%s-%04d%02d.otf",
 		CFG_DATA_DIR, HOSTNAME, CFG_IFACE, tm->tm_year + 1900, tm->tm_mon + 1);
