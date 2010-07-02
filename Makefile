@@ -8,17 +8,17 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
 include $(INCLUDE_DIR)/package.mk
 
-# define Package/yantd
-#   SECTION:=utils
-#   CATEGORY:=Network
-#   DEFAULT:=n
-#   TITLE:=yantd - yet another network traffic daemon
-# endef
-# 
-# define Package/yantd/description
-#   yantd is a ...
-# endef
-# 
+define Package/yantd
+  SECTION:=utils
+  CATEGORY:=Network
+  DEFAULT:=n
+  TITLE:=yantd - yet another network traffic daemon
+endef
+
+define Package/yantd/description
+  yantd is a ...
+endef
+
 # define Build/Prepare
 #   mkdir -p $(PKG_BUILD_DIR)
 #   $(CP) ./src/* $(PKG_BUILD_DIR)/
