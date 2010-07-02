@@ -61,7 +61,7 @@ int main(int argc, char **argv)
 			}
 			case 'v':
 			{
-				fprintf(stderr, PROGRAM" v"VERSION"\n");
+				fprintf(stderr, PROGRAM"-cli v"VERSION"\n");
 				exit(EXIT_SUCCESS);
 			}
 			default:
@@ -71,7 +71,10 @@ int main(int argc, char **argv)
 		}
 	}
 	
-	if (optind != 1)
+	argc -= optind;
+	argv += optind;
+	
+	if (argc != 1)
 	{
 		usage(EXIT_FAILURE);
 	}
