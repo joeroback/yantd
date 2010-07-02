@@ -24,6 +24,14 @@
 #define PROGRAM "yantd"
 #define VERSION "1.0"
 
+enum {
+	kDisplayBytes,
+	kDisplayKiB,
+	kDisplayMiB,
+	kDisplayGiB,
+	kDisplayHumanReadable
+};
+
 static uint8_t DAYSINMONTH[12] = {
 	31, /* Jan */
 	29, /* Feb */
@@ -39,7 +47,57 @@ static uint8_t DAYSINMONTH[12] = {
 	31  /* Dec */
 };
 
-static void usage(int status) __attribute__((__noreturn__));
+static void __attribute__((__noreturn__)) usage(int status)
+{
+	fprintf(stderr, "Usage: %s <traffic file>\n", PROGRAM);
+	exit(status);
+}
+
+static __inline__ double formatbytes(int format, uint64_t bytes)
+{
+	switch (format)
+	{
+		case kDisplayBytes:
+		{
+			return ((double) bytes);
+		}
+		case kDisplayKiB:
+		{
+			return ((double) bytes) / 1024.0f;
+		}
+		case kDisplayMiB:
+		{
+			return ((double) bytes) / 1024.0f / 1024.0f;
+		}
+		case kDisplayGiB:
+		{
+			return ((double) bytes) / 1024.0f / 1024.0f / 1024.0f;
+		}
+		case kDisplayHumanReadable:
+		{
+			if (bytes < 1024)
+			{
+				return ((double) bytes);
+			}
+			else if (bytes < 1024 * 1024)
+			{
+				return formatbytes(kDisplayKiB, bytes);
+			}
+			else if (bytes < 1024 * 1024 * 1024)
+			{
+				return formatbytes(kDisplayMiB, bytes);
+			}
+			else
+			{
+				return formatbytes(kDisplayGiB, bytes);
+			}
+		}
+		default:
+		{
+			abort();
+		}
+	}
+}
 
 int main(int argc, char **argv)
 {
@@ -47,17 +105,38 @@ int main(int argc, char **argv)
 	struct yantdhdr hdr;
 	struct yantddatum *data;
 	size_t nitems;
-	int i, opt;
+	int i, opt, format = kDisplayHumanReadable;
 	double rx_total, tx_total;
 	
 	// parse cmd line options
-	while ((opt = getopt(argc, argv, "hv")) != -1)
+	while ((opt = getopt(argc, argv, "ghkmv")) != -1)
 	{
 		switch (opt)
 		{
+			case 'b':
+			{
+				format = kDisplayBytes;
+				break;
+			}
+			case 'g':
+			{
+				format = kDisplayGiB;
+				break;
+			}
 			case 'h':
 			{
-				usage(EXIT_SUCCESS);
+				format = kDisplayHumanReadable;
+				break;
+			}
+			case 'k':
+			{
+				format = kDisplayKiB;
+				break;
+			}
+			case 'm':
+			{
+				format = kDisplayMiB;
+				break;
 			}
 			case 'v':
 			{
@@ -113,7 +192,7 @@ int main(int argc, char **argv)
 	for (i = 0; i < DAYSINMONTH[hdr.month]; i++)
 	{
 		printf("    %02d\t%18.2f\t%18.2f\n",
-			i+1, data[i].rx / 1024.0f / 1024.0f, data[i].tx / 1024.0f / 1024.0f);
+			i+1, formatbytes(format, data[i].rx), formatbytes(format, data[i].tx));
 		
 		rx_total += data[i].rx;
 		tx_total += data[i].tx;
@@ -121,16 +200,10 @@ int main(int argc, char **argv)
 	
 	printf("------\t------------------\t------------------\n");
 	printf("Totals\t%18.2f\t%18.2f\n",
-		rx_total / 1024.0f / 1024.0f, tx_total / 1024.0f / 1024.0f);
+		formatbytes(format, rx_total), formatbytes(format, tx_total));
 	
 	// free data
 	free(data);
 	
 	return 0;
-}
-
-static void usage(int status)
-{
-	fprintf(stderr, "Usage: %s <traffic file>\n", PROGRAM);
-	exit(status);
 }
