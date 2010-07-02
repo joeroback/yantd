@@ -79,7 +79,7 @@ int main(int argc, char **argv)
 		usage(EXIT_FAILURE);
 	}
 	
-	if ((fp = fopen(argv[1], "r")) == NULL)
+	if ((fp = fopen(argv[0], "r")) == NULL)
 	{
 		fatalsys("fopen");
 	}
