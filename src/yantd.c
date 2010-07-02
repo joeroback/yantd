@@ -318,6 +318,8 @@ void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes)
 	data[tm->tm_mday].rx += rx_bytes;
 	data[tm->tm_mday].tx += tx_bytes;
 	
+	dprintf("tm_mday=%d\n", tm->tm_mday);
+	
 	dprintf("rx_bytes=%"PRIu64", tx_bytes=%"PRIu64"\n",
 		data[tm->tm_mday].rx, data[tm->tm_mday].tx);
 	
