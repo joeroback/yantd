@@ -1,0 +1,32 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+STOP=40
+
+BINARY="/usr/sbin/yantd"
+PIDFILE="/var/run/yantd.pid"
+DATADIR="/var/lib/yantd"
+INTERFACE="eth1"
+INTERVAL="30"
+
+start () {
+	#loglevel=$(uci_get "system.@system[0].cronloglevel")
+	
+	[ -x "${BINARY}" ] || exit 1
+	[ -d "${DATADIR}" ] || mkdir -p "${DATADIR}";
+	
+	start-stop-daemon -S -q -x "${BINARY}" -m -p "${PIDFILE}" -- \
+	 	-d "${DATADIR}" -i "${INTERFACE}" -t "${INTERVAL}"
+}
+
+stop() {
+	[ -s "${PIDFILE}" ] && {
+		start-stop-daemon -K -s TERM -q -n ${BINARY##*/} -p "${PIDFILE}"
+	}
+}
+
+restart() {
+	stop
+	sleep 2
+	start
+}
