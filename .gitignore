@@ -1,8 +1,8 @@
 *.tmproj
 *.o
 *.d
-otraff
-otraffd
+yantd
+yantd-cli
 *~
 .AppleDouble
 ._*
