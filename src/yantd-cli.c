@@ -109,7 +109,7 @@ int main(int argc, char **argv)
 	double rx_total, tx_total;
 	
 	// parse cmd line options
-	while ((opt = getopt(argc, argv, "ghkmv")) != -1)
+	while ((opt = getopt(argc, argv, "bghkmv")) != -1)
 	{
 		switch (opt)
 		{
