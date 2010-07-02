@@ -8,15 +8,11 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/yantd/default
-  SECTION:=net
-  CATEGORY:=Network
-  TITLE:=yantd - yet another network traffic daemon
-endef
-
 define Package/yantd
-  $(Package/yantd/default)
-  MENU:=1
+  SECTION:=utils
+  CATEGORY:=Network
+  DEFAULT:=n
+  TITLE:=yantd - yet another network traffic daemon
 endef
 
 define Package/yantd/description
