@@ -1,4 +1,4 @@
-CFLAGS += -I.
+CFLAGS += -I. -DNDEBUG
 
 .PHONY: all
 

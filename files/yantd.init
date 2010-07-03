@@ -4,25 +4,38 @@ START=99
 STOP=40
 
 BINARY="/usr/sbin/yantd"
-PIDFILE="/var/run/yantd.pid"
-DATADIR="/var/lib/yantd"
-INTERFACE="eth1"
-INTERVAL="30"
 
 start () {
-	#loglevel=$(uci_get "system.@system[0].cronloglevel")
-	
+	local datadir
+
 	[ -x "${BINARY}" ] || exit 1
-	[ -d "${DATADIR}" ] || mkdir -p "${DATADIR}";
-	
-	start-stop-daemon -S -q -x "${BINARY}" -m -p "${PIDFILE}" -- \
-	 	-d "${DATADIR}" -i "${INTERFACE}" -t "${INTERVAL}"
+
+	config_load yantd
+	config_get datadir config datadir "/tmp/yantd"
+	[ -d "${datadir}" ] || mkdir -p "${datadir}"
+
+	config_foreach start_interface interface "${datadir}"
+}
+
+start_interface() {
+	local cfg="${1}"
+	local datadir="${2}"
+	local enable interface interval
+
+	config_get_bool enable "${cfg}" enable '1'
+	[ "${enable}" -ne 1 ] && return
+
+	config_get interface "${cfg}" interface ''
+	[ -z "${interface}" ] && return
+
+	config_get interval "${cfg}" interval '30'
+	[ "${interval}" -le 0 -o "${interval}" -gt 3600 ] && return
+
+	"${BINARY}" -d "${datadir}" -i "${interface}" -t ${interval}
 }
 
 stop() {
-	[ -s "${PIDFILE}" ] && {
-		start-stop-daemon -K -s TERM -q -n ${BINARY##*/} -p "${PIDFILE}"
-	}
+	killall -TERM yantd
 }
 
 restart() {

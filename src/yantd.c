@@ -74,7 +74,7 @@ void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes);
 
 int main(int argc, char **argv)
 {
-	struct yantddatum od, odp;
+	struct yantddatum yd, ydp;
 	int opt;
 	unsigned int slp;
 	
@@ -169,25 +169,28 @@ int main(int argc, char **argv)
 	signal(SIGQUIT, catch_sigintquitterm);
 	signal(SIGTERM, catch_sigintquitterm);
 	
+	memset(&yd, 0, sizeof(struct yantddatum));
+	memset(&ydp, 0, sizeof(struct yantddatum));
+	
 	// do initial reading of dev bytes
-	read_dev_bytes(&odp);
+	read_dev_bytes(&ydp);
 	
 	do
 	{
 		// sleep between reads
 		if ((slp = sleep(CFG_INTERVAL)) != 0U)
 		{
-			yantdlog(LOG_NOTICE,"sleep was interrupted, remaining=%u\n", slp);
+			yantdlog(LOG_NOTICE, "sleep was interrupted, remaining=%u\n", slp);
 		}
 		
 		// read proc net file
-		read_dev_bytes(&od);
+		read_dev_bytes(&yd);
 		
 		// write the difference out
-		write_dev_bytes(od.rx - odp.rx, od.tx - odp.tx);
+		write_dev_bytes(yd.rx - ydp.rx, yd.tx - ydp.tx);
 		
 		// swap previous datum
-		odp = od;
+		ydp = yd;
 	} while (termint == 0U);
 	
 	yantdlog(LOG_NOTICE, "main loop terminated, termint=%u\n", termint);
