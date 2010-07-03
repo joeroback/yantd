@@ -75,8 +75,8 @@ void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes);
 int main(int argc, char **argv)
 {
 	struct yantddatum yd, ydp;
-	int opt;
 	unsigned int slp;
+	int opt;
 	
 	// parse cmd line options
 	while ((opt = getopt(argc, argv, "d:fi:t:v")) != -1)
@@ -155,8 +155,7 @@ int main(int argc, char **argv)
 		openlog("yantd", LOG_PID | LOG_NDELAY | LOG_PERROR, LOG_DAEMON);
 	}
 	
-	yantdlog(LOG_INFO,
-		"datadir=%s, interface=%s, timeinterval=%u, hostname=%s\n",
+	dbgf("datadir=%s, interface=%s, timeinterval=%u, hostname=%s\n",
 		CFG_DATA_DIR, CFG_IFACE, CFG_INTERVAL, HOSTNAME);
 	
 	// install signal handlers
@@ -193,13 +192,16 @@ int main(int argc, char **argv)
 		ydp = yd;
 	} while (termint == 0U);
 	
-	yantdlog(LOG_NOTICE, "main loop terminated, termint=%u\n", termint);
+	yantdlog(LOG_NOTICE, PROGRAM" has been terminated, status=%u\n", termint);
 	
 	// return status of 1 on SIGINT...
 	if (termint == 2U)
 	{
 		exit(EXIT_FAILURE);
 	}
+	
+	// clean up syslog descriptor
+	closelog();
 	
 	return 0;
 }
@@ -299,8 +301,7 @@ void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes)
 	snprintf(FILENAME, sizeof(FILENAME), "%s/%s-%s-%04d%02d.otf",
 		CFG_DATA_DIR, HOSTNAME, CFG_IFACE, tm->tm_year + 1900, tm->tm_mon + 1);
 	
-	yantdlog(LOG_INFO,
-		"write bytes: filename=%s, year=%d, month=%d, day=%d\n",
+	dbgf("write bytes: filename=%s, year=%d, month=%d, day=%d\n",
 		FILENAME, tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday);
 	
 	// filesize is based on days in month
@@ -343,8 +344,7 @@ void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes)
 	data[tm->tm_mday - 1].rx += rx_bytes;
 	data[tm->tm_mday - 1].tx += tx_bytes;
 	
-	yantdlog(LOG_INFO,
-		"write bytes: rx_bytes=%"PRIu64", tx_bytes=%"PRIu64"\n",
+	dbgf("write bytes: rx_bytes=%"PRIu64", tx_bytes=%"PRIu64"\n",
 		rx_bytes, tx_bytes);
 	
 	// write out new bytes

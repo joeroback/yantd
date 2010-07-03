@@ -35,7 +35,7 @@
 # define dbgf(fmt, ...) ((void) 0)
 #endif
 
-#define yantdlog(prio, fmt, ...) do { \
+# define yantdlog(prio, fmt, ...) do { \
 	syslog(prio, fmt, ## __VA_ARGS__); \
 } while (0)
 
