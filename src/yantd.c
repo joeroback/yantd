@@ -90,7 +90,7 @@ int main(int argc, char **argv)
 			}
 			case 'f':
 			{
-				stayinfg = 1;
+				stayinfg = 1U;
 				break;
 			}
 			case 'i':
