@@ -85,8 +85,7 @@ int main(int argc, char **argv)
 		{
 			case 'd':
 			{
-				snprintf(CFG_DATA_DIR, sizeof(CFG_DATA_DIR),
-					"%s/%s", optarg, PROGRAM);
+				snprintf(CFG_DATA_DIR, sizeof(CFG_DATA_DIR), "%s", optarg);
 				break;
 			}
 			case 'f':
