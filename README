@@ -1,1 +1,6 @@
 yantd - yet another network traffic daemon for OpenWrt
+
+Initially and loosely based off the ttraff daemon from DD-WRT. I have Comcast
+cable and they have a 250GB per month limit. I like to see my external bandwidth
+on a month by month basis with history. This makes collectd not such a good
+option since it is a rolling history.
