@@ -29,6 +29,8 @@
 #include <syslog.h>
 #include <errno.h>
 
+#include <sys/file.h>
+
 #ifndef NDEBUG
 # define dbgf(fmt, ...) do { fprintf(stderr, fmt, ## __VA_ARGS__); } while (0)
 #else

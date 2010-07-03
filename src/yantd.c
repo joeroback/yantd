@@ -321,6 +321,11 @@ void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes)
 	}
 	else
 	{
+		if (flock(fileno(fp), LOCK_SH) != 0)
+		{
+			fatalsys("flock");
+		}
+		
 		// read out hdr
 		if (fread(&hdr, sizeof(struct yantdhdr), 1, fp) != 1)
 		{
@@ -337,6 +342,11 @@ void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes)
 		{
 			fatalsys("fclose");
 		}
+		
+		if (flock(fileno(fp), LOCK_UN) != 0)
+		{
+			fatalsys("flock");
+		}
 	}
 	
 	// append new bytes
@@ -352,6 +362,11 @@ void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes)
 		fatalsys("fopen");
 	}
 	
+	if (flock(fileno(fp), LOCK_EX) != 0)
+	{
+		fatalsys("flock");
+	}
+	
 	// write year/month header
 	if (fwrite(&hdr, sizeof(struct yantdhdr), 1, fp) != 1)
 	{
@@ -362,6 +377,11 @@ void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes)
 	if (fwrite(data, sizeof(struct yantddatum), nitems, fp) != nitems)
 	{
 		fatalsys("fwrite");
+	}
+	
+	if (flock(fileno(fp), LOCK_UN) != 0)
+	{
+		fatalsys("flock");
 	}
 	
 	if (fclose(fp) != 0)

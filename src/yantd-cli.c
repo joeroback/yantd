@@ -147,6 +147,11 @@ int main(int argc, char **argv)
 		fatalsys("fopen");
 	}
 	
+	if (flock(fileno(fp), LOCK_SH) != 0)
+	{
+		fatalsys("flock");
+	}
+	
 	if (fread(&hdr, sizeof(struct yantdhdr), 1, fp) != 1)
 	{
 		fatalusr("fread", "data file is corrupt");
@@ -159,6 +164,11 @@ int main(int argc, char **argv)
 	if (fread(data, sizeof(struct yantddatum), nitems, fp) != nitems)
 	{
 		fatalusr("fread", "data file is corrupt");
+	}
+	
+	if (flock(fileno(fp), LOCK_UN) != 0)
+	{
+		fatalsys("flock");
 	}
 	
 	if (fclose(fp) != 0)
