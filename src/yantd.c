@@ -194,6 +194,11 @@ int main(int argc, char **argv)
 		// read proc net file
 		read_dev_bytes(&yd);
 		
+		dbgf("read bytes: "
+			"rx_bytes=%"PRIu64", tx_bytes=%"PRIu64", "
+			"rx_prev=%"PRIu64", tx_prev=%"PRIu64"\n",
+			yd.rx, yd.tx, ydp.rx, ydp.tx);
+		
 		// check for rollovers
 		// /proc/net/dev entries are only 32-bit on most routers
 		if (yd.rx < ydp.rx)
@@ -385,9 +390,6 @@ void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes)
 	// append new bytes
 	data[tm->tm_mday - 1].rx += rx_bytes;
 	data[tm->tm_mday - 1].tx += tx_bytes;
-	
-	dbgf("write bytes: rx_bytes=%"PRIu64", tx_bytes=%"PRIu64"\n",
-		rx_bytes, tx_bytes);
 	
 	// write out new bytes
 	if ((fp = fopen(FILENAME, "w")) == NULL)

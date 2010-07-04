@@ -1,4 +1,5 @@
-CFLAGS += -I. -DNDEBUG
+CFLAGS += -I. -DNDEBUG -fomit-frame-pointer
+#CFLAGS += -I. -g
 
 .PHONY: all
 
