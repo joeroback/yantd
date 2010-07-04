@@ -371,14 +371,14 @@ void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes)
 			fatalsys("fread");
 		}
 		
-		if (fclose(fp) != 0)
-		{
-			fatalsys("fclose");
-		}
-		
 		if (flock(fileno(fp), LOCK_UN) != 0)
 		{
 			fatalsys("flock");
+		}
+		
+		if (fclose(fp) != 0)
+		{
+			fatalsys("fclose");
 		}
 	}
 	
