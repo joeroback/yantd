@@ -43,13 +43,11 @@
 
 #define fatalsys(msg) do { \
 	syslog(LOG_ERR, "error=%s", strerror(errno)); \
-	fprintf(stderr, "%s (line %d): %s\n", msg, __LINE__, strerror(errno)); \
 	exit(EXIT_FAILURE); \
 } while (0)
 
 #define fatalusr(cause, msg) do { \
 	syslog(LOG_ERR, "cause=%s, error=%s", cause, msg); \
-	fprintf(stderr, "%s (line %d): %s\n", cause, __LINE__, msg); \
 	exit(EXIT_FAILURE); \
 } while (0)
 
