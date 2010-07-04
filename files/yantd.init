@@ -29,7 +29,7 @@ start_interface() {
 	[ -z "${interface}" ] && return
 
 	config_get interval "${cfg}" interval '30'
-	[ "${interval}" -le 0 -o "${interval}" -gt 120 ] && return
+	[ "${interval}" -le 0 -o "${interval}" -gt 300 ] && return
 
 	"${BINARY}" -d "${datadir}" -i "${interface}" -t ${interval}
 }
