@@ -40,6 +40,13 @@
 #define PROGRAM "yantd"
 #define VERSION "1.0"
 
+/* assumes 64 or 32 bit */
+#if __WORDSIZE == 64
+# define BYTES_MAX UINT64_MAX
+#else
+# define BYTES_MAX UINT32_MAX
+#endif
+
 static uint8_t DAYSINMONTH[12] = {
 	31, /* Jan */
 	29, /* Feb */
@@ -75,6 +82,7 @@ void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes);
 int main(int argc, char **argv)
 {
 	struct yantddatum yd, ydp;
+	uint64_t rx_diff, tx_diff;
 	unsigned int slp;
 	int opt;
 	
@@ -157,12 +165,14 @@ int main(int argc, char **argv)
 	dbgf("datadir=%s, interface=%s, timeinterval=%u, hostname=%s\n",
 		CFG_DATA_DIR, CFG_IFACE, CFG_INTERVAL, HOSTNAME);
 	
-	// install signal handlers
+	// ignore these signals
 	signal(SIGCHLD, SIG_IGN);
 	signal(SIGTSTP, SIG_IGN);
 	signal(SIGTTOU, SIG_IGN);
 	signal(SIGTTIN, SIG_IGN);
 	signal(SIGHUP, SIG_IGN);
+	
+	// install signal handlers
 	signal(SIGINT, catch_sigintquitterm);
 	signal(SIGQUIT, catch_sigintquitterm);
 	signal(SIGTERM, catch_sigintquitterm);
@@ -184,8 +194,28 @@ int main(int argc, char **argv)
 		// read proc net file
 		read_dev_bytes(&yd);
 		
+		// check for rollovers
+		// /proc/net/dev entries are only 32-bit on most routers
+		if (yd.rx < ydp.rx)
+		{
+			rx_diff = BYTES_MAX - ydp.rx + yd.rx;
+		}
+		else
+		{
+			rx_diff = yd.rx - ydp.rx;
+		}
+		
+		if (yd.tx < ydp.tx)
+		{
+			tx_diff = BYTES_MAX - ydp.tx + yd.tx;
+		}
+		else
+		{
+			tx_diff = yd.tx - ydp.tx;
+		}
+		
 		// write the difference out
-		write_dev_bytes(yd.rx - ydp.rx, yd.tx - ydp.tx);
+		write_dev_bytes(rx_diff, tx_diff);
 		
 		// swap previous datum
 		ydp = yd;
@@ -248,6 +278,7 @@ void read_dev_bytes(struct yantddatum *bytes)
 {
 	static char line[384];
 	FILE *fp;
+	unsigned long rx, tx;
 	
 	if ((fp = fopen("/proc/net/dev", "r")) == NULL)
 	{
@@ -259,11 +290,13 @@ void read_dev_bytes(struct yantddatum *bytes)
 		if (strstr(line, CFG_IFACE) != NULL)
 		{
 			sscanf(strchr(line, ':') + 1,
-				"%"PRIu64" "
-				"%*u %*u %*u %*u %*u %*u %*u "
-				"%"PRIu64" "
-				"%*u %*u %*u %*u %*u %*u %*u",
-				&bytes->rx, &bytes->tx);
+				"%lu %*u %*u %*u %*u %*u %*u %*u "
+				"%lu %*u %*u %*u %*u %*u %*u %*u",
+				&rx, &tx);
+				
+			bytes->rx = (uint64_t) rx;
+			bytes->tx = (uint64_t) tx;
+			
 			break;
 		}
 	}
