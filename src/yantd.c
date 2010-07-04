@@ -20,7 +20,7 @@
  *
  * Traffic data is stored with the following format by year/month:
  *
- *   File is named `CFG_DATA_DIR/yantd/<hostname>-<iface>-<year><month>.otf'
+ *   File is named `CFG_DATA_DIR/yantd/<hostname>-<iface>-<year><month>.dat'
  *
  *   File header contains year (uint16_t) / month (uint8_t)
  *   Data is stored as uint64_t types. One for rx bytes, one for tx bytes,
@@ -335,7 +335,7 @@ void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes)
 	
 	assert(tm->tm_mday >= 1 || tm->tm_mday <= DAYSINMONTH[tm->tm_mon]);
 	
-	snprintf(FILENAME, sizeof(FILENAME), "%s/%s-%s-%04d%02d.otf",
+	snprintf(FILENAME, sizeof(FILENAME), "%s/%s-%s-%04d%02d.dat",
 		CFG_DATA_DIR, HOSTNAME, CFG_IFACE, tm->tm_year + 1900, tm->tm_mon + 1);
 	
 	dbgf("write bytes: filename=%s, year=%d, month=%d, day=%d\n",
