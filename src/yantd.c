@@ -220,7 +220,10 @@ int main(int argc, char **argv)
 		}
 		
 		// write the difference out
-		write_dev_bytes(rx_diff, tx_diff);
+		if (rx_diff != 0U || tx_diff != 0U)
+		{
+			write_dev_bytes(rx_diff, tx_diff);
+		}
 		
 		// swap previous datum
 		ydp = yd;
