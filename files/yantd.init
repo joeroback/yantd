@@ -6,7 +6,7 @@ STOP=40
 BINARY="/usr/sbin/yantd"
 
 start () {
-	local datadir
+	local datadir niceness
 
 	[ -x "${BINARY}" ] || exit 1
 
@@ -14,12 +14,16 @@ start () {
 	config_get datadir config datadir "/tmp/yantd"
 	[ -d "${datadir}" ] || mkdir -p "${datadir}"
 
-	config_foreach start_interface interface "${datadir}"
+	config_get niceness config niceness 0
+	[ ${niceness} -ge -19 -a ${niceness} -le 19 ] || exit 1
+
+	config_foreach start_interface interface "${datadir}" ${niceness}
 }
 
 start_interface() {
 	local cfg="${1}"
 	local datadir="${2}"
+	local niceness=${3}
 	local enable interface interval
 
 	config_get_bool enable "${cfg}" enable '1'
@@ -31,7 +35,11 @@ start_interface() {
 	config_get interval "${cfg}" interval '30'
 	[ "${interval}" -le 0 -o "${interval}" -gt 300 ] && return
 
-	"${BINARY}" -d "${datadir}" -i "${interface}" -t ${interval}
+	if [ -x /bin/nice ]; then
+		/bin/nice -n ${niceness} "${BINARY}" -d "${datadir}" -i "${interface}" -t ${interval}
+	else
+		"${BINARY}" -d "${datadir}" -i "${interface}" -t ${interval}
+	fi
 }
 
 stop() {
