@@ -33,12 +33,14 @@ start_interface() {
 
 	config_get interval "${cfg}" interval 30
 	if [ "${interval}" -le 0 -o "${interval}" -gt 300 ]; then
-		logger -t yantd "interval must be between 1 and 300 seconds. skipping ${interface}..."
+		logger -t yantd -p daemon.warn \
+			"interval must be between 1 and 300 seconds. skipping ${interface}."
 		return
 	fi
 
 	if [ -x /bin/nice ]; then
-		/bin/nice -n ${niceness} "${YANTDBIN}" -d "${datadir}" -i "${interface}" -t ${interval}
+		/bin/nice -n ${niceness} \
+			"${YANTDBIN}" -d "${datadir}" -i "${interface}" -t ${interval}
 	else
 		"${YANTDBIN}" -d "${datadir}" -i "${interface}" -t ${interval}
 	fi
