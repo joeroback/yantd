@@ -15,7 +15,7 @@ start () {
 	[ -d "${datadir}" ] || mkdir -p "${datadir}"
 
 	config_get niceness config niceness 0
-	[ ${niceness} -ge -19 -a ${niceness} -le 19 ] || exit 1
+	[ "${niceness}" -ge -19 -a "${niceness}" -le 19 ] || exit 1
 
 	config_foreach start_interface interface "${datadir}" ${niceness}
 }
@@ -23,17 +23,20 @@ start () {
 start_interface() {
 	local cfg="${1}"
 	local datadir="${2}"
-	local niceness=${3}
+	local niceness="${3}"
 	local enable interface interval
 
-	config_get_bool enable "${cfg}" enable '1'
+	config_get_bool enable "${cfg}" enable 1
 	[ "${enable}" -ne 1 ] && return
 
-	config_get interface "${cfg}" interface ''
+	config_get interface "${cfg}" interface ""
 	[ -z "${interface}" ] && return
 
-	config_get interval "${cfg}" interval '30'
-	[ "${interval}" -le 0 -o "${interval}" -gt 300 ] && return
+	config_get interval "${cfg}" interval 30
+	if [ "${interval}" -le 0 -o "${interval}" -gt 300 ]; then
+		logger -t yantd "interval must be between 1 and 300 seconds. skipping ${interface}..."
+		return
+	fi
 
 	if [ -x /bin/nice ]; then
 		/bin/nice -n ${niceness} "${BINARY}" -d "${datadir}" -i "${interface}" -t ${interval}
