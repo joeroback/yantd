@@ -46,10 +46,10 @@ start_interface() {
 
 stop() {
 	killall -TERM `basename "${YANTDBIN}"`
+	sleep 5 # give 5 seconds to flush
 }
 
 restart() {
 	stop
-	sleep 2
 	start
 }
