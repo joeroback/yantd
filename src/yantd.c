@@ -123,7 +123,10 @@ int main(int argc, char **argv)
 		}
 	}
 	
-	if (optind != argc)
+	argc -= optind;
+	argv += optind;
+	
+	if (argc != 0)
 	{
 		usage(EXIT_FAILURE);
 	}
@@ -194,9 +197,9 @@ int main(int argc, char **argv)
 		// read proc net file
 		read_dev_bytes(&yd);
 		
-		dbgf("read bytes: "
-			"rx_bytes=%"PRIu64", tx_bytes=%"PRIu64", "
-			"rx_prev=%"PRIu64", tx_prev=%"PRIu64"\n",
+		dbgf("device bytes\n"
+			"\trx_bytes=%"PRIu64", tx_bytes=%"PRIu64"\n"
+			"\t rx_prev=%"PRIu64",  tx_prev=%"PRIu64"\n",
 			yd.rx, yd.tx, ydp.rx, ydp.tx);
 		
 		// check for rollovers
@@ -277,7 +280,7 @@ static void catch_sigintquitterm(int signo)
 		}
 		default:
 		{
-			fatalusr("catch_sigintquitterm", "unknown signal");
+			fatalsys("unknown signal");
 		}
 	}
 }
@@ -390,9 +393,11 @@ void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes)
 		}
 	}
 	
-	// append new bytes
-	data[tm->tm_mday - 1].rx += rx_bytes;
-	data[tm->tm_mday - 1].tx += tx_bytes;
+	// append new bytes, write big endian format
+	data[tm->tm_mday - 1].rx =
+		h64tob64(b64toh64(data[tm->tm_mday - 1].rx) + rx_bytes);
+	data[tm->tm_mday - 1].tx =
+		h64tob64(b64toh64(data[tm->tm_mday - 1].tx) + tx_bytes);
 	
 	// write out new bytes
 	if ((fp = fopen(FILENAME, "w")) == NULL)

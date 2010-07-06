@@ -31,6 +31,21 @@
 
 #include <sys/file.h>
 
+#if defined(__linux__)
+# include <endian.h>
+# define h64tob64(u) htobe64(u)
+# define b64toh64(u) be64toh(u)
+#elif defined(__APPLE__)
+# include <libkern/OSByteOrder.h>
+# define h64tob64(u) OSSwapHostToBigInt64(u)
+# define b64toh64(u) OSSwapBigToHostInt64(u)
+#endif
+
+#undef MIN
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#undef MAX
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
+
 #ifndef NDEBUG
 # define dbgf(fmt, ...) do { fprintf(stderr, fmt, ## __VA_ARGS__); } while (0)
 #else
@@ -48,6 +63,11 @@
 
 #define fatalusr(cause, msg) do { \
 	syslog(LOG_ERR, "cause=%s, error=%s", cause, msg); \
+	exit(EXIT_FAILURE); \
+} while (0)
+
+#define fatalcli(fmt, ...) do { \
+	fprintf(stderr, fmt, ## __VA_ARGS__); \
 	exit(EXIT_FAILURE); \
 } while (0)
 

@@ -46,34 +46,46 @@ static uint8_t DAYSINMONTH[12] = {
 	31  /* Dec */
 };
 
-static int format = kDisplayMB;
 static char *suffix = "MB";
 
 static void __attribute__((__noreturn__)) usage(int status)
 {
-	fprintf(stderr, "Usage: %s [-gkmtv] <traffic file>\n", PROGRAM);
+	fprintf(stderr,
+		"Usage: %s [-gkmtv] [-r start-end] <traffic file>\n\n", PROGRAM);
+	fprintf(stderr,
+		"\t-g\tOutput format Gigabytes\n");
+	fprintf(stderr,
+		"\t-k\tOutput format Kilobytes\n");
+	fprintf(stderr,
+		"\t-m\tOutput format Megabytes\n");
+	fprintf(stderr,
+		"\t-r\tOnly shows days in range (e.g. 3-5 shows 3rd through 5th)\n");
+	fprintf(stderr,
+		"\t-t\tOutput format Terabytes\n");
+	fprintf(stderr,
+		"\t-v\tShow version info\n\n");
 	exit(status);
 }
 
-static __inline__ double formatbytes(int format, uint64_t bytes)
+static __inline__ double formatbytes(int format, double bytes)
 {
 	switch (format)
 	{
 		case kDisplayKB:
 		{
-			return ((double) bytes) / 1024.0f;
+			return bytes / 1024.0f;
 		}
 		case kDisplayMB:
 		{
-			return ((double) bytes) / 1024.0f / 1024.0f;
+			return bytes / 1024.0f / 1024.0f;
 		}
 		case kDisplayGB:
 		{
-			return ((double) bytes) / 1024.0f / 1024.0f / 1024.0f;
+			return bytes / 1024.0f / 1024.0f / 1024.0f;
 		}
 		case kDisplayTB:
 		{
-			return ((double) bytes) / 1024.0f / 1024.0f / 1024.0f / 1024.0f;
+			return bytes / 1024.0f / 1024.0f / 1024.0f / 1024.0f;
 		}
 		default:
 		{
@@ -88,11 +100,13 @@ int main(int argc, char **argv)
 	struct yantdhdr hdr;
 	struct yantddatum *data;
 	size_t nitems;
-	int i, opt, format = kDisplayMB;
+	int range_start = -1;
+	int range_end = -1;
+	int i, n, opt, format = kDisplayMB;
 	double rx_total, tx_total;
 	
 	// parse cmd line options
-	while ((opt = getopt(argc, argv, "gkmtv")) != -1)
+	while ((opt = getopt(argc, argv, "gkmr:tv")) != -1)
 	{
 		switch (opt)
 		{
@@ -112,6 +126,14 @@ int main(int argc, char **argv)
 			{
 				format = kDisplayMB;
 				suffix = "MB";
+				break;
+			}
+			case 'r':
+			{
+				if(sscanf(optarg, "%d-%d", &range_start, &range_end) != 2)
+				{
+					fatalcli("invalid day range format\n");
+				}
 				break;
 			}
 			case 't':
@@ -138,7 +160,6 @@ int main(int argc, char **argv)
 	
 	if (argc != 1)
 	{
-		printf("foo: %d\n", argc, optind);
 		usage(EXIT_FAILURE);
 	}
 	
@@ -154,16 +175,16 @@ int main(int argc, char **argv)
 	
 	if (fread(&hdr, sizeof(struct yantdhdr), 1, fp) != 1)
 	{
-		fatalusr("fread", "data file is corrupt");
+		fatalcli("data file is corrupt\n");
 	}
 	
 	// allocate space for data
-	nitems = DAYSINMONTH[hdr.month];
+	nitems = (size_t) DAYSINMONTH[hdr.month];
 	data = malloc(sizeof(struct yantddatum) * nitems);
 	
 	if (fread(data, sizeof(struct yantddatum), nitems, fp) != nitems)
 	{
-		fatalusr("fread", "data file is corrupt");
+		fatalcli("data file is corrupt\n");
 	}
 	
 	if (flock(fileno(fp), LOCK_UN) != 0)
@@ -176,6 +197,34 @@ int main(int argc, char **argv)
 		fatalsys("fclose");
 	}
 	
+	if (range_start != -1)
+	{
+		if (range_start < 1 || range_start > DAYSINMONTH[hdr.month])
+		{
+			fatalcli("invalid start day value\n");
+		}
+		
+		i = range_start - 1;
+	}
+	else
+	{
+		i = 0;
+	}
+	
+	if (range_end != -1)
+	{
+		if (range_end < 1 || range_end > DAYSINMONTH[hdr.month])
+		{
+			fatalcli("invalid end day value\n");
+		}
+		
+		n = range_end;
+	}
+	else
+	{
+		n = DAYSINMONTH[hdr.month];
+	}
+	
 	// initialize totals
 	rx_total = 0.0f;
 	tx_total = 0.0f;
@@ -183,14 +232,14 @@ int main(int argc, char **argv)
 	printf("   Day\t%21s\t%21s\n", "Received", "Transmitted");
 	printf("------\t---------------------\t---------------------\n");
 	
-	for (i = 0; i < DAYSINMONTH[hdr.month]; i++)
+	for (; i < n; i++)
 	{
 		printf("    %02d\t%18.1f %s\t%18.1f %s\n", i+1,
-			formatbytes(format, data[i].rx), suffix,
-			formatbytes(format, data[i].tx), suffix);
+			formatbytes(format, b64toh64(data[i].rx)), suffix,
+			formatbytes(format, b64toh64(data[i].tx)), suffix);
 		
-		rx_total += data[i].rx;
-		tx_total += data[i].tx;
+		rx_total += b64toh64(data[i].rx);
+		tx_total += b64toh64(data[i].tx);
 	}
 	
 	printf("------\t---------------------\t---------------------\n");
