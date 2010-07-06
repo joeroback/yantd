@@ -3,30 +3,29 @@
 START=99
 STOP=40
 
-BINARY="/usr/sbin/yantd"
+YANTDBIN="/usr/sbin/yantd"
+
+datadir="/tmp/yantd"
+niceness=0
 
 start () {
-	local datadir niceness
-
-	[ -x "${BINARY}" ] || exit 1
+	[ -x "${YANTDBIN}" ] || exit 1
 
 	config_load yantd
-	config_get datadir config datadir "/tmp/yantd"
+	config_get datadir config datadir
 	[ -d "${datadir}" ] || mkdir -p "${datadir}"
 
-	config_get niceness config niceness 0
+	config_get niceness config niceness
 	[ "${niceness}" -ge -19 -a "${niceness}" -le 19 ] || exit 1
 
-	config_foreach start_interface interface "${datadir}" ${niceness}
+	config_foreach start_interface interface
 }
 
 start_interface() {
 	local cfg="${1}"
-	local datadir="${2}"
-	local niceness="${3}"
-	local enable interface interval
+	local enabled interface interval
 
-	config_get_bool enable "${cfg}" enable 1
+	config_get_bool enabled "${cfg}" enabled 0
 	[ "${enable}" -ne 1 ] && return
 
 	config_get interface "${cfg}" interface ""
@@ -39,14 +38,14 @@ start_interface() {
 	fi
 
 	if [ -x /bin/nice ]; then
-		/bin/nice -n ${niceness} "${BINARY}" -d "${datadir}" -i "${interface}" -t ${interval}
+		/bin/nice -n ${niceness} "${YANTDBIN}" -d "${datadir}" -i "${interface}" -t ${interval}
 	else
-		"${BINARY}" -d "${datadir}" -i "${interface}" -t ${interval}
+		"${YANTDBIN}" -d "${datadir}" -i "${interface}" -t ${interval}
 	fi
 }
 
 stop() {
-	killall -TERM yantd
+	killall -TERM `basename "${YANTDBIN}"`
 }
 
 restart() {
