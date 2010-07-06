@@ -26,7 +26,7 @@ start_interface() {
 	local enabled interface interval
 
 	config_get_bool enabled "${cfg}" enabled 0
-	[ "${enable}" -ne 1 ] && return
+	[ "${enabled}" -ne 1 ] && return
 
 	config_get interface "${cfg}" interface ""
 	[ -z "${interface}" ] && return
