@@ -280,7 +280,7 @@ static void catch_sigintquitterm(int signo)
 		}
 		default:
 		{
-			fatalsys("unknown signal");
+			fatalusr("catch_sigintquitterm", "unknown signal");
 		}
 	}
 }

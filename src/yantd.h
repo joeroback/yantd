@@ -41,11 +41,6 @@
 # define b64toh64(u) OSSwapBigToHostInt64(u)
 #endif
 
-#undef MIN
-#define MIN(a,b) ((a) < (b) ? (a) : (b))
-#undef MAX
-#define MAX(a,b) ((a) > (b) ? (a) : (b))
-
 #ifndef NDEBUG
 # define dbgf(fmt, ...) do { fprintf(stderr, fmt, ## __VA_ARGS__); } while (0)
 #else
