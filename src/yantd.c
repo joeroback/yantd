@@ -395,9 +395,9 @@ void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes)
 	
 	// append new bytes, write big endian format
 	data[tm->tm_mday - 1].rx =
-		h64tob64(b64toh64(data[tm->tm_mday - 1].rx) + rx_bytes);
+		htobe64(be64toh(data[tm->tm_mday - 1].rx) + rx_bytes);
 	data[tm->tm_mday - 1].tx =
-		h64tob64(b64toh64(data[tm->tm_mday - 1].tx) + tx_bytes);
+		htobe64(be64toh(data[tm->tm_mday - 1].tx) + tx_bytes);
 	
 	// write out new bytes
 	if ((fp = fopen(FILENAME, "w")) == NULL)

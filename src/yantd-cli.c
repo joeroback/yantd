@@ -235,11 +235,11 @@ int main(int argc, char **argv)
 	for (; i < n; i++)
 	{
 		printf("    %02d\t%18.1f %s\t%18.1f %s\n", i+1,
-			formatbytes(format, b64toh64(data[i].rx)), suffix,
-			formatbytes(format, b64toh64(data[i].tx)), suffix);
+			formatbytes(format, be64toh(data[i].rx)), suffix,
+			formatbytes(format, be64toh(data[i].tx)), suffix);
 		
-		rx_total += b64toh64(data[i].rx);
-		tx_total += b64toh64(data[i].tx);
+		rx_total += be64toh(data[i].rx);
+		tx_total += be64toh(data[i].tx);
 	}
 	
 	printf("------\t---------------------\t---------------------\n");

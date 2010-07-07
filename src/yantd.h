@@ -32,13 +32,28 @@
 #include <sys/file.h>
 
 #if defined(__linux__)
+# include <byteswap.h>
 # include <endian.h>
-# define h64tob64(u) htobe64(u)
-# define b64toh64(u) be64toh(u)
+
+# ifndef htobe64
+#  if __BYTE_ORDER == __LITTLE_ENDIAN
+#   define htobe64(x) bswap_64(x)
+#  else
+#   define htobe64(x) (x)
+#  endif
+# endif
+
+# ifndef be64toh
+#  if __BYTE_ORDER == __LITTLE_ENDIAN
+#   define be64toh(x) bswap_64(x)
+#  else
+#   define be64toh(x) (x)
+#  endif
+# endif
 #elif defined(__APPLE__)
 # include <libkern/OSByteOrder.h>
-# define h64tob64(u) OSSwapHostToBigInt64(u)
-# define b64toh64(u) OSSwapBigToHostInt64(u)
+# define htobe64(u) OSSwapHostToBigInt64(u)
+# define be64toh(u) OSSwapBigToHostInt64(u)
 #endif
 
 #ifndef NDEBUG
