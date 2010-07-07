@@ -76,8 +76,8 @@ static unsigned char termint = 0U;
 
 static void usage(int status) __attribute__((noreturn));
 static void catch_sigintquitterm(int signo);
-void read_dev_bytes(struct yantddatum *bytes);
-void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes);
+static void read_dev_bytes(struct yantddatum *bytes);
+static void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes);
 
 int main(int argc, char **argv)
 {
@@ -285,7 +285,7 @@ static void catch_sigintquitterm(int signo)
 	}
 }
 
-void read_dev_bytes(struct yantddatum *bytes)
+static void read_dev_bytes(struct yantddatum *bytes)
 {
 	static char line[384];
 	FILE *fp;
@@ -318,7 +318,7 @@ void read_dev_bytes(struct yantddatum *bytes)
 	}
 }
 
-void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes)
+static void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes)
 {
 	FILE *fp;
 	struct tm *tm;
