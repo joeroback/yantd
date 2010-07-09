@@ -21,8 +21,8 @@
 #include <yantd.h>
 #include <unistd.h>
 
-#define PROGRAM "yantd"
-#define VERSION "1.0"
+#define PROGRAM "yantd-cli"
+#define VERSION "1.0.0"
 
 enum {
 	kDisplayKB,
@@ -49,7 +49,7 @@ static uint8_t DAYSINMONTH[12] = {
 static void __attribute__((__noreturn__)) usage(int status)
 {
 	fprintf(stderr,
-		"Usage: %s [-gkmtv] [-r start-end] <traffic file>\n\n", PROGRAM);
+		"Usage: "PROGRAM" [-gkmtv] [-r start-end] <traffic file>\n\n");
 	fprintf(stderr,
 		"\t-g\tOutput format Gigabytes\n");
 	fprintf(stderr,
@@ -98,9 +98,8 @@ int main(int argc, char **argv)
 	struct yantdhdr hdr;
 	struct yantddatum *data;
 	size_t nitems;
-	int range_start = -1;
-	int range_end = -1;
 	int i, n, fmt = kDisplayMB;
+	int range_start = -1, range_end = -1;
 	char *suffix = "MB";
 	double rx_total, tx_total;
 	
@@ -147,7 +146,7 @@ int main(int argc, char **argv)
 			}
 			case 'v':
 			{
-				fprintf(stderr, PROGRAM"-cli v"VERSION"\n");
+				fprintf(stderr, PROGRAM" v"VERSION"\n");
 				exit(EXIT_SUCCESS);
 			}
 			case '?':

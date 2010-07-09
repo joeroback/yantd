@@ -15,7 +15,9 @@ define Package/yantd
 endef
 
 define Package/yantd/description
-  yantd is a ...
+  yantd is a network traffic daemon that collects network device traffic
+  information and stores to file. A command line interface can then be used
+  to output the data on a month-by-month basis.
 endef
 
 define Build/Prepare

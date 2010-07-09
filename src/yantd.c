@@ -38,7 +38,7 @@
 #include <assert.h>
 
 #define PROGRAM "yantd"
-#define VERSION "1.0"
+#define VERSION "1.0.0"
 
 /* assumes 64 or 32 bit */
 #if __WORDSIZE == 64
