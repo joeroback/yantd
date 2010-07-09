@@ -46,8 +46,6 @@ static uint8_t DAYSINMONTH[12] = {
 	31  /* Dec */
 };
 
-static char *suffix = "MB";
-
 static void __attribute__((__noreturn__)) usage(int status)
 {
 	fprintf(stderr,
@@ -67,9 +65,9 @@ static void __attribute__((__noreturn__)) usage(int status)
 	exit(status);
 }
 
-static __inline__ double formatbytes(int format, double bytes)
+static __inline__ double formatbytes(int fmt, double bytes)
 {
-	switch (format)
+	switch (fmt)
 	{
 		case kDisplayKB:
 		{
@@ -102,29 +100,30 @@ int main(int argc, char **argv)
 	size_t nitems;
 	int range_start = -1;
 	int range_end = -1;
-	int i, n, opt, format = kDisplayMB;
+	int i, n, fmt = kDisplayMB;
+	char *suffix = "MB";
 	double rx_total, tx_total;
 	
 	// parse cmd line options
-	while ((opt = getopt(argc, argv, "gkmr:tv")) != -1)
+	while ((i = getopt(argc, argv, "gkmr:tv")) != -1)
 	{
-		switch (opt)
+		switch (i)
 		{
 			case 'g':
 			{
-				format = kDisplayGB;
+				fmt = kDisplayGB;
 				suffix = "GB";
 				break;
 			}
 			case 'k':
 			{
-				format = kDisplayKB;
+				fmt = kDisplayKB;
 				suffix = "KB";
 				break;
 			}
 			case 'm':
 			{
-				format = kDisplayMB;
+				fmt = kDisplayMB;
 				suffix = "MB";
 				break;
 			}
@@ -134,11 +133,15 @@ int main(int argc, char **argv)
 				{
 					fatalcli("invalid day range format\n");
 				}
+				if (range_start > range_end)
+				{
+					fatalcli("invalid day range format\n");
+				}
 				break;
 			}
 			case 't':
 			{
-				format = kDisplayTB;
+				fmt = kDisplayTB;
 				suffix = "TB";
 				break;
 			}
@@ -229,23 +232,31 @@ int main(int argc, char **argv)
 	rx_total = 0.0f;
 	tx_total = 0.0f;
 	
-	printf("   Day\t%21s\t%21s\n", "Received", "Transmitted");
-	printf("------\t---------------------\t---------------------\n");
+	printf("   Day\t%21s\t%21s\t%21s\n", "Received", "Transmitted", "Total");
+	printf("------"
+		"\t---------------------"
+		"\t---------------------"
+		"\t---------------------\n");
 	
 	for (; i < n; i++)
 	{
-		printf("    %02d\t%18.1f %s\t%18.1f %s\n", i+1,
-			formatbytes(format, be64toh(data[i].rx)), suffix,
-			formatbytes(format, be64toh(data[i].tx)), suffix);
+		printf("    %02d\t%18.1f %s\t%18.1f %s\t%18.1f %s\n", i+1,
+			formatbytes(fmt, be64toh(data[i].rx)), suffix,
+			formatbytes(fmt, be64toh(data[i].tx)), suffix,
+			formatbytes(fmt, be64toh(data[i].rx)+be64toh(data[i].tx)), suffix);
 		
 		rx_total += be64toh(data[i].rx);
 		tx_total += be64toh(data[i].tx);
 	}
 	
-	printf("------\t---------------------\t---------------------\n");
-	printf("Totals\t%18.1f %s\t%18.1f %s\n",
-		formatbytes(format, rx_total), suffix,
-		formatbytes(format, tx_total), suffix);
+	printf("------"
+		"\t---------------------"
+		"\t---------------------"
+		"\t---------------------\n");
+	printf("Totals\t%18.1f %s\t%18.1f %s\t%18.1f %s\n",
+		formatbytes(fmt, rx_total), suffix,
+		formatbytes(fmt, tx_total), suffix,
+		formatbytes(fmt, rx_total+tx_total), suffix);
 	
 	// free data
 	free(data);

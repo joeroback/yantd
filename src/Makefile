@@ -1,5 +1,4 @@
 CFLAGS += -Wall -Wunused -I. -DNDEBUG -fomit-frame-pointer
-#CFLAGS += -I. -g
 
 .PHONY: all
 

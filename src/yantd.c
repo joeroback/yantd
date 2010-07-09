@@ -65,7 +65,7 @@ static uint8_t DAYSINMONTH[12] = {
 static char CFG_DATA_DIR[PATH_MAX] = { "/tmp/"PROGRAM };
 static char CFG_IFACE[32] = { "eth1" };
 static unsigned int CFG_INTERVAL = 5U;
-static char HOSTNAME[256] = { "" };
+static char CFG_HOSTNAME[256] = { "" };
 static char FILENAME[FILENAME_MAX] = { "" };
 
 // foreground flag
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 	int opt;
 	
 	// parse cmd line options
-	while ((opt = getopt(argc, argv, "d:fi:t:v")) != -1)
+	while ((opt = getopt(argc, argv, "d:fh:i:t:v")) != -1)
 	{
 		switch (opt)
 		{
@@ -99,6 +99,11 @@ int main(int argc, char **argv)
 			case 'f':
 			{
 				stayinfg = 1U;
+				break;
+			}
+			case 'h':
+			{
+				snprintf(CFG_HOSTNAME, sizeof(CFG_HOSTNAME), "%s", optarg);
 				break;
 			}
 			case 'i':
@@ -116,6 +121,7 @@ int main(int argc, char **argv)
 				fprintf(stderr, PROGRAM" v"VERSION"\n");
 				exit(EXIT_SUCCESS);
 			}
+			case '?':
 			default:
 			{
 				usage(EXIT_FAILURE);
@@ -131,10 +137,14 @@ int main(int argc, char **argv)
 		usage(EXIT_FAILURE);
 	}
 	
-	// get current hostname
-	if (gethostname(HOSTNAME, sizeof(HOSTNAME)) != 0)
+	// get current hostname from system if user
+	// did not specify it on the command line
+	if (strcmp(CFG_HOSTNAME, "") == 0)
 	{
-		fatalsys("gethostname");
+		if (gethostname(CFG_HOSTNAME, sizeof(CFG_HOSTNAME)) != 0)
+		{
+			fatalsys("gethostname");
+		}
 	}
 	
 	// if not flagged for foreground operation, detach process
@@ -166,7 +176,7 @@ int main(int argc, char **argv)
 	}
 	
 	dbgf("datadir=%s, interface=%s, timeinterval=%u, hostname=%s\n",
-		CFG_DATA_DIR, CFG_IFACE, CFG_INTERVAL, HOSTNAME);
+		CFG_DATA_DIR, CFG_IFACE, CFG_INTERVAL, CFG_HOSTNAME);
 	
 	// ignore these signals
 	signal(SIGCHLD, SIG_IGN);
@@ -342,7 +352,7 @@ static void write_dev_bytes(uint64_t rx_bytes, uint64_t tx_bytes)
 	assert(tm->tm_mday >= 1 || tm->tm_mday <= DAYSINMONTH[tm->tm_mon]);
 	
 	snprintf(FILENAME, sizeof(FILENAME), "%s/%s-%s-%04d%02d.dat",
-		CFG_DATA_DIR, HOSTNAME, CFG_IFACE, tm->tm_year + 1900, tm->tm_mon + 1);
+		CFG_DATA_DIR, CFG_HOSTNAME, CFG_IFACE, tm->tm_year + 1900, tm->tm_mon + 1);
 	
 	dbgf("write bytes: filename=%s, year=%d, month=%d, day=%d\n",
 		FILENAME, tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday);
