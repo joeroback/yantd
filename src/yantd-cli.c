@@ -199,6 +199,7 @@ int main(int argc, char **argv)
 		fatalsys("fclose");
 	}
 	
+	// determine loop start/end
 	if (range_start != -1)
 	{
 		if (range_start < 1 || range_start > DAYSINMONTH[hdr.month])

@@ -1,12 +1,13 @@
 #!/bin/sh /etc/rc.common
 
 START=99
-STOP=40
+STOP=10
 
 YANTDBIN="/usr/sbin/yantd"
 
 datadir="/tmp/yantd"
 niceness=0
+ioniceness=2
 
 start () {
 	[ -x "${YANTDBIN}" ] || exit 1
@@ -18,11 +19,15 @@ start () {
 	config_get niceness config niceness
 	[ "${niceness}" -ge -19 -a "${niceness}" -le 19 ] || exit 1
 
+	config_get ioniceness config ioniceness
+	[ "${ioniceness}" -ge -1 -a "${ioniceness}" -le 3 ] || exit 1
+
 	config_foreach start_interface interface
 }
 
 start_interface() {
 	local cfg="${1}"
+	local runcmd=""
 	local enabled interface interval
 
 	config_get_bool enabled "${cfg}" enabled 0
@@ -38,12 +43,10 @@ start_interface() {
 		return
 	fi
 
-	if [ -x /bin/nice ]; then
-		/bin/nice -n ${niceness} \
-			"${YANTDBIN}" -d "${datadir}" -i "${interface}" -t ${interval}
-	else
-		"${YANTDBIN}" -d "${datadir}" -i "${interface}" -t ${interval}
-	fi
+	[ -x /bin/nice ] && runcmd="/bin/nice -n${niceness}"
+	[ -x /bin/ionice ] && runcmd="/bin/ionice -c${ioniceness}"
+
+	"${runcmd}" "${YANTDBIN}" -d "${datadir}" -i "${interface}" -t ${interval}
 }
 
 stop() {
