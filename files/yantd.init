@@ -44,7 +44,7 @@ start_interface() {
 	fi
 
 	[ -x /bin/nice ] && runcmd="/bin/nice -n${niceness}"
-	[ -x /bin/ionice ] && runcmd="/bin/ionice -c${ioniceness}"
+	[ -x /bin/ionice ] && runcmd="/bin/ionice -c${ioniceness} ${runcmd}"
 
 	"${runcmd}" "${YANTDBIN}" -d "${datadir}" -i "${interface}" -t ${interval}
 }
