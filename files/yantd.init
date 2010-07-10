@@ -20,7 +20,7 @@ start () {
 	[ "${niceness}" -ge -19 -a "${niceness}" -le 19 ] || exit 1
 
 	config_get ioniceness config ioniceness
-	[ "${ioniceness}" -ge -1 -a "${ioniceness}" -le 3 ] || exit 1
+	[ "${ioniceness}" -ge 1 -a "${ioniceness}" -le 3 ] || exit 1
 
 	config_foreach start_interface interface
 }
