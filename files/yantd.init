@@ -46,15 +46,15 @@ start_interface() {
 	[ -x /bin/nice ] && runcmd="/bin/nice -n${niceness}"
 	[ -x /bin/ionice ] && runcmd="/bin/ionice -c${ioniceness} ${runcmd}"
 
-	"${runcmd}" "${YANTDBIN}" -d "${datadir}" -i "${interface}" -t ${interval}
+	eval "${runcmd}" "${YANTDBIN}" -d "${datadir}" -i "${interface}" -t ${interval}
 }
 
 stop() {
 	killall -TERM `basename "${YANTDBIN}"`
-	sleep 5 # give 5 seconds to flush
 }
 
 restart() {
 	stop
+	sleep 5
 	start
 }
