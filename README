@@ -4,3 +4,24 @@ Initially and loosely based off the ttraff daemon from DD-WRT. I have Comcast
 cable and they have a 250GB per month limit. I like to see my external bandwidth
 on a month by month basis with history. This makes collectd not such a good
 option since it is a rolling history.
+
+I recently saw another project called vnStat. I initially thought I just
+did a lot of work for nothing. Then I realized vnStat limitations.
+Though it keeps a nice level of statistics, it only keeps them for a month.
+Then after a year, stats are discarded. While this is a nice feature,
+I would like the ability to keep statistics for as long as one wants.
+
+I've posted the question of keeping past statisitics to the vnStat forums.
+If keeping past history is of no interest to the developer, I will continue
+on with this project.
+
+I've put together a list of things I would like to do with this project
+in the immediate future, pending an answer from the vnStat developer
+about keeping past stats data.
+
+(*) yantd.conf file
+(*) hourly, daily, monthly, yearly stats keep indefinitely (configurable).
+(*) advanced stats will require more advanced database file
+(*) png image output for nice graphs like vnstati
+(*) optional ncurses interface
+(*) Support for BSD platforms like FreeBSD, Mac OS X, etc.
