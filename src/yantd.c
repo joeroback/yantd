@@ -168,6 +168,9 @@ int main(int argc, char **argv)
 		
 		// open syslog
 		openlog("yantd", LOG_PID | LOG_NDELAY, LOG_DAEMON);
+		
+		// announce ourselves
+		yantdlog(LOG_NOTICE, PROGRAM" daemon "VERSION" started.");
 	}
 	else
 	{
@@ -177,6 +180,8 @@ int main(int argc, char **argv)
 	
 	dbgf("datadir=%s, interface=%s, timeinterval=%u, hostname=%s\n",
 		CFG_DATA_DIR, CFG_IFACE, CFG_INTERVAL, CFG_HOSTNAME);
+	
+	yantdlog(LOG_NOTICE, "Monitoring: %s", CFG_IFACE);
 	
 	// ignore these signals
 	signal(SIGHUP, SIG_IGN);
