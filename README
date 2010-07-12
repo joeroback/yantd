@@ -23,5 +23,5 @@ about keeping past stats data.
 (*) hourly, daily, monthly, yearly stats keep indefinitely (configurable).
 (*) advanced stats will require more advanced database file
 (*) png image output for nice graphs like vnstati
-(*) optional ncurses interface
 (*) Support for BSD platforms like FreeBSD, Mac OS X, etc.
+(*) optional ncurses interface
